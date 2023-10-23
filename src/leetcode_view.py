@@ -39,14 +39,24 @@ class LeetcodeView(platform_view.PlatformView):
         for n in m.nodes:
             if n.is_root:
                 count = self.get_module_problem_count(m)
-                label = "%s(%s)" % (n.name, str(count))
+                label = f"{n.name}({str(count)})"
                 # 根节点
-                g.node(name=n.name, label=label, style='filled', target="_parent", href="https://leetcode-cn.com/tag/"+slug, 
+                g.node(
+                    name=n.name,
+                    label=label,
+                    style='filled',
+                    target="_parent",
+                    href=f"https://leetcode-cn.com/tag/{slug}",
                     fontsize='14',
-                    fillcolor="orangered", color='lightgrey', fontcolor="white", fontname="Microsoft YaHei", shape='box')
+                    fillcolor="orangered",
+                    color='lightgrey',
+                    fontcolor="white",
+                    fontname="Microsoft YaHei",
+                    shape='box',
+                )
             else:
                 # 普通模块节点
-                label = "%s(%s)" % (n.name, str(len(n.problems)))
+                label = f"{n.name}({len(n.problems)})"
                 g.node(name=n.name, label=label, style='filled', fillcolor="lightslategray", color='lightgrey', 
                     fontsize='12',
                     fontcolor="white", fontname="Microsoft YaHei", shape='box')
@@ -59,7 +69,7 @@ class LeetcodeView(platform_view.PlatformView):
                 level = leet.get_level(p.id)
                 problem = leet.get_problem(p.id)
                 idstr = str(p.id)
-                title = idstr+". "+title
+                title = f"{idstr}. {title}"
                 color = "lightgrey"
 
                 if level == "Easy":
@@ -74,8 +84,16 @@ class LeetcodeView(platform_view.PlatformView):
                 slug = problem['data']['question']['questionTitleSlug']
 
                 # 题目节点
-                g.node(name=idstr, label=title, target="_parent", href="https://leetcode-cn.com/problems/"+slug, 
-                        color=color, fontname="Microsoft YaHei", fontsize='12', shape='box')
+                g.node(
+                    name=idstr,
+                    label=title,
+                    target="_parent",
+                    href=f"https://leetcode-cn.com/problems/{slug}",
+                    color=color,
+                    fontname="Microsoft YaHei",
+                    fontsize='12',
+                    shape='box',
+                )
 
                 if len(last) > 0:
                     g.edge(last, idstr, color=theme.color_arrow)
@@ -86,7 +104,7 @@ class LeetcodeView(platform_view.PlatformView):
         g.format = 'svg'
         g.render(filename=util.get_images(out_name))
         os.remove(util.get_images(out_name))
-        self.post_process(util.get_images(out_name)+".svg")
+        self.post_process(f"{util.get_images(out_name)}.svg")
 
 def process():
     leet = leetcode.Leetcode()

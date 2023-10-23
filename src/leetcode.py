@@ -10,10 +10,10 @@ db_path = 'leetcode.db'
 user_agent = r'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36'
 
 def withUrl(u):
-    return "https://leetcode-cn.com/"+u
+    return f"https://leetcode-cn.com/{u}"
 
 def leetcode_key(id):
-    return "leetcode_"+str(id)
+    return f"leetcode_{str(id)}"
 
 def is_int(s):
     try: 
@@ -37,85 +37,73 @@ class Leetcode:
                 self.flasks.append(k)
 
     def init_db(self):
-        d = SqliteDict(util.get_db('leetcode.sqlite'), autocommit=True)
-        return d
+        return SqliteDict(util.get_db('leetcode.sqlite'), autocommit=True)
 
     def close_db(self):
         self.dict.close()
 
     def get_tag_problems(self, tag):
         problems = self.get_all_problems()
-        datas = [] 
+        datas = []
         for k in problems:
             try:
                 j = json.loads(problems[k])
                 tags = j['data']['question']['topicTags']
-                paid_only = j['data']['question']['paid_only']
                 if len(tags) > 0:
+                    paid_only = j['data']['question']['paid_only']
                     for t in tags:
                         if t['slug'] == tag and paid_only == False:
                             datas.append(j)
                             break
             except Exception as e:
                 print("unknow key:", k, e)
-                pass
         return datas
 
     def get_all_problems(self):
-        d = {}
-        for k, v in self.dict.iteritems():
-            if k.startswith("leetcode_") and k[9].isdigit():
-                d[k] = v
-        return d
+        return {
+            k: v
+            for k, v in self.dict.iteritems()
+            if k.startswith("leetcode_") and k[9].isdigit()
+        }
 
     def save_problem(self, id, content):
         self.dict[leetcode_key(id)] = content
         self.dict.commit()
 
     def get_problem_content(self, id):
-        v = self.dict.get(leetcode_key(id))
-        return v
+        return self.dict.get(leetcode_key(id))
 
     def get_level(self, id):
         content = self.get_problem_content(id)
-        if content == None:
+        if content is None:
             print("title not exist:", id)
             return str(id)
         j = json.loads(content)
         return j['data']['question']['difficulty']
 
     def check_finish(self, id):
-        for k in self.finished:
-            if k.startswith(id+"."):
-                return True
-        return False
+        return any(k.startswith(f"{id}.") for k in self.finished)
 
     def check_flask(self, id):
-        for k in self.flasks:
-            if k.startswith(id+"."):
-                return k
-        return ""
+        return next((k for k in self.flasks if k.startswith(f"{id}.")), "")
 
     def get_problem(self, id):
         content = self.get_problem_content(id)
-        if content == None:
+        if content is None:
             print("title not exist:", id)
             return str(id)
-        j = json.loads(content)
-        return j
+        return json.loads(content)
 
     def get_title(self, id):
         content = self.get_problem_content(id)
-        if content == None:
+        if content is None:
             print("title not exist:", id)
             return str(id)
         j = json.loads(content)
         return j['data']['question']['translatedTitle']
 
     def get_title_with_slug(self, id, slug, paid_only):
-        content = self.get_problem_content(id)
-
-        if content:
+        if content := self.get_problem_content(id):
             j = json.loads(content)
             return j['data']['question']['translatedTitle']
 
@@ -149,17 +137,14 @@ class Leetcode:
 
         json_data = json.dumps(params).encode('utf8')
         resp = session.post(url, data=json_data, headers=headers, timeout=10)
-        content = resp.text
-        j = json.loads(content)
+        j = json.loads(resp.text)
         j['data']['question']['paid_only'] = paid_only
         self.save_problem(id, json.dumps(j))
         return j['data']['question']['translatedTitle']
 
     def get_update_db_time(self):
         t = self.dict.get("leetcode_update_db_time")
-        if t == None:
-            return 0
-        return t
+        return 0 if t is None else t
 
     def save_update_db_time(self):
         self.dict["leetcode_update_db_time"] = util.now()
@@ -185,8 +170,7 @@ class Leetcode:
                 paid_only = q['paid_only']
                 title = self.get_title_with_slug(id, slug, paid_only)
                 print("id:", id, level, title)
-            
+
             self.save_update_db_time()
         except Exception as e:
             print("leetcode update db error:", e)
-            pass

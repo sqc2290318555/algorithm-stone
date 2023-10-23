@@ -25,22 +25,12 @@ def check_leetcode_tags():
     for k in problems:
         j = json.loads(problems[k])
         tags = j['data']['question']['topicTags']
-        for t in tags:
-            all_tags.append(t['slug'])
-    all_tags = list(dict.fromkeys(all_tags))
-    all_tags.sort()
-
-    d = {}
-
-    for item in all_tags:
-        d[item] = len(leet.get_tag_problems(item))
+        all_tags.extend(t['slug'] for t in tags)
+    all_tags = sorted(dict.fromkeys(all_tags))
+    d = {item: len(leet.get_tag_problems(item)) for item in all_tags}
     sorted(d, key=d.get)
 
-    items = []
-    
-    for k in sorted(d, key=d.get):
-        items.append(str(k)+" "+str(d[k]))
-
+    items = [f"{str(k)} {str(d[k])}" for k in sorted(d, key=d.get)]
     print('\n'.join(items))
     print("--------------tags end-------------")
 
@@ -49,26 +39,22 @@ def check_leetcode_tag(s):
         check_leetcode_tags()
         return
     tag = s[0].lower()
-    level = ""
-    if len(s) > 1:
-        level = s[1].lower()
-
+    level = s[1].lower() if len(s) > 1 else ""
     problems = leet.get_all_problems()
 
-    datas = [] 
+    datas = []
     for k in problems:
         try:
             j = json.loads(problems[k])
             tags = j['data']['question']['topicTags']
-            paid_only = j['data']['question']['paid_only']
             if len(tags) > 0:
+                paid_only = j['data']['question']['paid_only']
                 for t in tags:
                     if t['slug'] == tag and paid_only == False:
                         datas.append(j)
                         break
         except Exception as e:
             print("unknow key:", k, e)
-            pass
     # 
     ids = []
     strs = {}
@@ -76,11 +62,11 @@ def check_leetcode_tag(s):
         id = get_problem_id(k)
         if int(id) < 100000:
             lv = k['data']['question']['difficulty'].lower()
-            if level == lv or level == "":
+            if level in [lv, ""]:
                 ids.append(int(id))
                 s = "%s\t%s\t%s" % (id, k['data']['question']['difficulty'], k['data']['question']['translatedTitle'])
                 strs[int(id)] = s
-    
+
     ids.sort()
     print(' '.join([str(item) for item in ids ]))
 

@@ -58,10 +58,7 @@ class PlatformView(object):
         return title.isdigit()
 
     def get_module_problem_count(self, m):
-        c = 0
-        for n in m.nodes:
-            c += len(n.problems)
-        return c
+        return sum(len(n.problems) for n in m.nodes)
     
     def resize_svg(self, svg):
         viewBox = svg["viewBox"]
@@ -89,7 +86,7 @@ class PlatformView(object):
 
     def post_process_problem_node(self, graph, n):
         title = n.title.get_text()
-        
+
         # get positions
         points = n.g.polygon['points'].split()
         p0 = points[0].split(",")
@@ -116,7 +113,7 @@ class PlatformView(object):
         # flask = self.leet.check_flask(title)
         flask = self.check_flask(title)
         if flask != "":
-            url = "https://github.com/acm-clan/algorithm-stone/blob/main/user/%s/%s" % (self.slug, flask)
+            url = f"https://github.com/acm-clan/algorithm-stone/blob/main/user/{self.slug}/{flask}"
             text = svg_icon_flask % (str(x0-9), str(y2-9), url)
             t = BeautifulSoup(text, "xml").select_one("g")
             n.append(t)
