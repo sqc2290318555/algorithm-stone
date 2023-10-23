@@ -39,14 +39,14 @@ class CodeforcesView(platform_view.PlatformView):
         for n in m.nodes:
             if n.is_root:
                 count = self.get_module_problem_count(m)
-                label = "%s(%s)" % (n.name, str(count))
+                label = f"{n.name}({str(count)})"
                 # 根节点
                 g.node(name=n.name, label=label, style='filled', target="_parent", href="https://codeforces.com/problemset", 
                     fontsize='14',
                     fillcolor="orangered", color='lightgrey', fontcolor="white", fontname="Microsoft YaHei", shape='box')
             else:
                 # 普通模块节点
-                label = "%s(%s)" % (n.name, str(len(n.problems)))
+                label = f"{n.name}({len(n.problems)})"
                 g.node(name=n.name, label=label, style='filled', fillcolor="lightslategray", color='lightgrey', 
                     fontsize='12',
                     fontcolor="white", fontname="Microsoft YaHei", shape='box')
@@ -57,13 +57,13 @@ class CodeforcesView(platform_view.PlatformView):
             for p in n.problems:
                 problem = code.get_db_problem(p.id, False)
                 if not problem:
-                    print("problem not exist "+p.id)
+                    print(f"problem not exist {p.id}")
                     continue
                 title = problem['name']
                 level = code.get_level(problem)
 
                 idstr = str(p.id)
-                title = idstr+". "+title
+                title = f"{idstr}. {title}"
                 color = "lightgrey"
 
                 if level == "Easy":
@@ -90,7 +90,7 @@ class CodeforcesView(platform_view.PlatformView):
         g.format = 'svg'
         g.render(filename=util.get_images(out_name))
         os.remove(util.get_images(out_name))
-        self.post_process(util.get_images(out_name)+".svg")
+        self.post_process(f"{util.get_images(out_name)}.svg")
 
 def process():
     cf = codeforces.Codeforces()

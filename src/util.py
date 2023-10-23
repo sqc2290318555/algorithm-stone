@@ -7,14 +7,12 @@ def now():
     return round(time.time() * 1000)
 
 def save_file_content(file, content):
-    f = open(file, "w", encoding="utf-8")
-    f.write(content)
-    f.close()
+    with open(file, "w", encoding="utf-8") as f:
+        f.write(content)
 
 def get_file_content(file):
-    f = open(file, "r", encoding="utf-8")
-    t = f.read()
-    f.close()
+    with open(file, "r", encoding="utf-8") as f:
+        t = f.read()
     return t
 
 def get_root(d, f):

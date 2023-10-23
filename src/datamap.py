@@ -16,7 +16,7 @@ class DataMapNode:
         self.parent = parent
     
     def __repr__(self):
-        return "%s %s" % (self.name, self.is_root)
+        return f"{self.name} {self.is_root}"
 
     def __str__(self):
         return self.name
